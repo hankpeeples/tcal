@@ -13,7 +13,6 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/gookit/slog"
 	"golang.org/x/oauth2"
 )
 
@@ -24,10 +23,10 @@ func GetClient(config *oauth2.Config) *http.Client {
 	// time.
 	tok, err := tokenFromFile("token.json")
 	if err != nil {
-		slog.Info("Getting new token.")
+		Log.Info("Getting new token.")
 		getTokenFromWeb(config)
 	} else {
-		slog.Info("Using stored token.")
+		Log.Info("Using stored token.")
 	}
 
 	return config.Client(context.Background(), tok)
@@ -43,7 +42,7 @@ func getTokenFromWeb(config *oauth2.Config) {
 		// get auth code
 		authCode := r.URL.Query().Get("code")
 		if authCode == "" {
-			slog.Error("Unable to get auth code from server...")
+			Log.Error("Unable to get auth code from server...")
 			io.WriteString(w, "Error: could not find auth code in this request...\n")
 
 			cleanup(server)
@@ -52,7 +51,7 @@ func getTokenFromWeb(config *oauth2.Config) {
 
 		tok, err := config.Exchange(context.TODO(), authCode)
 		if err != nil {
-			slog.Fatalf("Unable to authorize token: %v", err)
+			Log.Fatalf("Unable to authorize token: %v", err)
 		}
 
 		saveToken("token.json", tok)
@@ -66,7 +65,7 @@ func getTokenFromWeb(config *oauth2.Config) {
 			</body>
 		</html>`)
 
-		slog.Infof("Successfully authenticated with google calendar API.")
+		Log.Infof("Successfully authenticated with google calendar API.")
 
 		// close the HTTP server
 		cleanup(server)
@@ -75,14 +74,14 @@ func getTokenFromWeb(config *oauth2.Config) {
 	// parse the redirect URL for the port number
 	u, err := url.Parse(config.RedirectURL)
 	if err != nil {
-		slog.Fatalf("Bad redirect URL: %s\n", err)
+		Log.Fatalf("Bad redirect URL: %s\n", err)
 	}
 
 	// set up a listener on the redirect port
 	port := fmt.Sprintf(":%s", u.Port())
 	l, err := net.Listen("tcp", port)
 	if err != nil {
-		slog.Fatalf("Can't listen to port %s: %s\n", port, err)
+		Log.Fatalf("Can't listen to port %s: %s\n", port, err)
 	}
 
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
@@ -97,7 +96,7 @@ func getTokenFromWeb(config *oauth2.Config) {
 }
 
 func cleanup(server *http.Server) {
-	slog.Infof("Stopping and cleaning auth server...")
+	Log.Infof("Stopping and cleaning auth server...")
 	go server.Close()
 }
 
@@ -116,11 +115,11 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 
 // Saves a token to a file path.
 func saveToken(path string, token *oauth2.Token) {
-	slog.Infof("Saving credential file to: %s\n", path)
+	Log.Infof("Saving credential file to: %s\n", path)
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC,
 		0600)
 	if err != nil {
-		slog.Errorf("Unable to cache oauth token: %v", err)
+		Log.Errorf("Unable to cache oauth token: %v", err)
 	}
 	defer f.Close()
 	json.NewEncoder(f).Encode(token)
@@ -131,17 +130,17 @@ func openInBrowser(url string) error {
 	var err error
 	switch runtime.GOOS {
 	case "linux":
-		slog.Info("%s linux", msg)
+		Log.Info("%s linux", msg)
 		err = exec.Command("xdg-open", url).Start()
 	case "windows":
-		slog.Info("%s windows", msg)
+		Log.Info("%s windows", msg)
 		err = exec.Command("rundll32",
 			"url.dll,FileProtocolHandler", url).Start()
 	case "darwin":
-		slog.Info("%s macOS", msg)
+		Log.Info("%s macOS", msg)
 		err = exec.Command("open", url).Start()
 	default:
-		slog.Warnf("Sorry, I can't open your browser at this time. Please use the following link: %s\n", url)
+		Log.Warnf("Sorry, I can't open your browser at this time. Please use the following link: %s\n", url)
 	}
 	if err != nil {
 		return err

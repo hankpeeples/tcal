@@ -4,12 +4,25 @@ import (
 	"log"
 	"os"
 
+	"github.com/gookit/slog"
+	"github.com/gookit/slog/handler"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
 )
 
+// Log is a slog logger that writes to the tcal log file
+var Log *slog.Logger
+
+func init() {
+	Log = slog.New()
+	h := handler.MustFileHandler("./tcal.log", handler.WithLogLevels(slog.AllLevels))
+
+	Log.PushHandler(h)
+}
+
 func main() {
+	Log.Infof("Hi")
 	// ctx := context.Background()
 
 	GetClient(ReadJSONConfig())
