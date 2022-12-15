@@ -132,14 +132,14 @@ func openInBrowser(url string) error {
 	var err error
 	switch runtime.GOOS {
 	case "linux":
-		Log.Info("%s linux", msg)
+		Log.Infof("%s linux", msg)
 		err = exec.Command("xdg-open", url).Start()
 	case "windows":
-		Log.Info("%s windows", msg)
+		Log.Infof("%s windows", msg)
 		err = exec.Command("rundll32",
 			"url.dll,FileProtocolHandler", url).Start()
 	case "darwin":
-		Log.Info("%s macOS", msg)
+		Log.Infof("%s macOS", msg)
 		err = exec.Command("open", url).Start()
 	default:
 		Log.Warnf("Sorry, I can't open your browser at this time. Please use the following link: %s\n", url)
