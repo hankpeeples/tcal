@@ -50,14 +50,6 @@ func getTokenFromWeb(config *oauth2.Config) {
 			return
 		}
 
-		authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-
-		fmt.Printf("Press [ enter ] to open the authorization link in your browser...")
-		fmt.Scanln()
-		if err := openInBrowser(authURL); err != nil {
-			log.Fatalf("Unable to open the authorization link: %v", err)
-		}
-
 		tok, err := config.Exchange(context.TODO(), authCode)
 		if err != nil {
 			slog.Fatalf("Unable to authorize token: %v", err)
@@ -74,7 +66,7 @@ func getTokenFromWeb(config *oauth2.Config) {
 			</body>
 		</html>`)
 
-		fmt.Println("Successfully logged into snapmaster API.")
+		slog.Infof("Successfully authenticated with google calendar API.")
 
 		// close the HTTP server
 		cleanup(server)
@@ -93,7 +85,13 @@ func getTokenFromWeb(config *oauth2.Config) {
 		slog.Fatalf("Can't listen to port %s: %s\n", port, err)
 	}
 
-	// https://gist.github.com/ogazitt/f749dad9cca8d0ac6607f93a42adf322
+	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+
+	fmt.Printf("Press [ enter ] to open the authorization link in your browser...")
+	fmt.Scanln()
+	if err := openInBrowser(authURL); err != nil {
+		log.Fatalf("Unable to open the authorization link: %v", err)
+	}
 
 	server.Serve(l)
 }
