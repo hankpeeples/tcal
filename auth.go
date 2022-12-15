@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/pterm/pterm"
 	"golang.org/x/oauth2"
 )
 
@@ -25,6 +26,7 @@ func GetClient(config *oauth2.Config) *http.Client {
 	if err != nil {
 		Log.Info("Getting new token.")
 		getTokenFromWeb(config)
+		pterm.Success.Println("Authenticated!")
 	} else {
 		Log.Info("Using stored token.")
 	}
