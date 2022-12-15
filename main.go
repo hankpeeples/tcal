@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 
+	garg "github.com/alexflint/go-arg"
 	"github.com/gookit/slog"
 	"github.com/gookit/slog/handler"
 	"golang.org/x/oauth2"
@@ -21,9 +23,24 @@ func init() {
 	Log.PushHandler(h)
 }
 
+// Options is the cli options for user configuration
+var Options struct {
+	NumItems int64 `arg:"-n, --numitems" help:"number of calendar events to pull" default:"10"`
+}
+
 func main() {
 	defer Log.Flush()
 
+	garg.MustParse(&Options)
+
+	// if token file doesn't exist, get auth and create it
+	if _, err := os.Stat("./token.json"); errors.Is(err, os.ErrNotExist) {
+		GetClient(ReadJSONConfig())
+	}
+	// When the user is initialy authenticated, the client needs to be re-configured
+	// or the refresh token will be invalid
+
+	// reconnect auth with token file config
 	client := GetClient(ReadJSONConfig())
 
 	GetCalendar(client)
