@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/calendar/v3"
 )
 
-// Log is a slog logger that writes to the tcal log file
+// Log is a logger that writes to the tcal log file
 var Log *slog.Logger
 
 func init() {
@@ -22,10 +22,11 @@ func init() {
 }
 
 func main() {
-	Log.Infof("Hi")
-	// ctx := context.Background()
+	defer Log.Flush()
 
-	GetClient(ReadJSONConfig())
+	client := GetClient(ReadJSONConfig())
+
+	GetCalendar(client)
 }
 
 // ReadJSONConfig reads the json file holding app client secret values
