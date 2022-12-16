@@ -4,10 +4,11 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/pterm/pterm"
 )
 
 var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
+	BorderStyle(lipgloss.RoundedBorder()).
 	BorderForeground(lipgloss.Color("#c0a46b"))
 
 type model struct {
@@ -45,12 +46,12 @@ func (m model) View() string {
 
 func printEventList(list []calEvent) {
 	columns := []table.Column{
-		{Title: "Event Name", Width: 25},
-		{Title: "Date", Width: 15},
-		{Title: "Description", Width: 15},
-		{Title: "Type", Width: 8},
-		{Title: "Status", Width: 10},
-		{Title: "Updated", Width: 15},
+		{Title: "Event Name", Width: pterm.GetTerminalWidth() / 7},
+		{Title: "Date", Width: pterm.GetTerminalWidth() / 7},
+		{Title: "Description", Width: pterm.GetTerminalWidth() / 7},
+		{Title: "Type", Width: pterm.GetTerminalWidth() / 7},
+		{Title: "Status", Width: pterm.GetTerminalWidth() / 7},
+		{Title: "Updated", Width: pterm.GetTerminalWidth() / 7},
 	}
 
 	var rows []table.Row
@@ -62,6 +63,7 @@ func printEventList(list []calEvent) {
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
+		table.WithHeight(len(list)),
 	)
 
 	tea.NewProgram(model{t}).Run()
