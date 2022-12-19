@@ -9,7 +9,7 @@ import (
 
 var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.RoundedBorder()).
-	BorderForeground(lipgloss.Color("#c0a46b"))
+	BorderForeground(lipgloss.Color("#c0a46b")).Align(lipgloss.Left)
 
 type model struct {
 	table table.Model
@@ -49,9 +49,9 @@ func printEventList(list []calEvent) {
 		{Title: "Event Name", Width: pterm.GetTerminalWidth() / 7},
 		{Title: "Date", Width: pterm.GetTerminalWidth() / 7},
 		{Title: "Description", Width: pterm.GetTerminalWidth() / 7},
-		{Title: "Type", Width: pterm.GetTerminalWidth() / 7},
-		{Title: "Status", Width: pterm.GetTerminalWidth() / 7},
-		{Title: "Updated", Width: pterm.GetTerminalWidth() / 7},
+		{Title: "Type", Width: 10},
+		{Title: "Status", Width: 12},
+		{Title: "Last Updated", Width: pterm.GetTerminalWidth() / 7},
 	}
 
 	var rows []table.Row
