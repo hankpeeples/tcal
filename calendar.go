@@ -35,6 +35,8 @@ func GetCalendar(client *http.Client) {
 
 	t := time.Now().Format(time.RFC3339) // Time must be formatted as RFC3339
 
+	// pterm.Info.Println(srv.CalendarList.List().Do())
+
 	events, err := srv.Events.List("primary").ShowDeleted(false).
 		SingleEvents(true).TimeMin(t).MaxResults(Options.NumItems).OrderBy("startTime").Do()
 
@@ -49,9 +51,9 @@ func GetCalendar(client *http.Client) {
 		pterm.Warning.Println("No upcoming events found.")
 	} else {
 		for _, item := range events.Items {
-			date := item.Start.DateTime
-			if date == "" {
-				date = item.Start.Date
+			date := parseDate(item.Start)
+			if item.Description == "" {
+				item.Description = "n/a"
 			}
 			calEvents = append(calEvents, calEvent{
 				Name:        item.Summary,
@@ -68,4 +70,16 @@ func GetCalendar(client *http.Client) {
 	spinner.Stop() // Remove spinner
 
 	printEventList(calEvents)
+}
+
+func parseDate(date *calendar.EventDateTime) string {
+	d := date.DateTime
+	if d == "" {
+		fdate, err := time.Parse("2006-01-02", date.Date)
+		if err != nil {
+			Log.Errorf("Unable to parse date: %v", err)
+		}
+		d = fdate.Format("02, Jan 2006")
+	}
+	return d
 }
