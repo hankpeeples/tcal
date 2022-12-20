@@ -71,10 +71,10 @@ func parseUpdated(date string) string {
 	}
 
 	s := time.Since(fdate).Seconds()
-	year := 31207680.00 / s
-	month := 2600640.00 / s
-	week := 604800.00 / s
-	day := 86400.00 / s
+	year := s / 31207680.00
+	month := s / 2600640.00
+	week := s / 604800.00
+	day := s / 86400.00
 
 	if year < 1 && month >= 1 {
 		return fmt.Sprintf("~%.0f months ago", month)
