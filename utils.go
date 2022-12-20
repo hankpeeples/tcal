@@ -2,13 +2,18 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
+	"strings"
+	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
 )
+
+var dateLongFormat = "Mon, Jan 02 2006 01:00 AM"
 
 // NeedsLogin will check if the token file already exists or not
 func NeedsLogin() bool {
@@ -35,4 +40,50 @@ func ReadJSONConfig() *oauth2.Config {
 	}
 
 	return config
+}
+
+func parseDate(item *calendar.EventDateTime) string {
+	var date string
+	d := item.DateTime
+	if d == "" {
+		// parse and format date with no timestamp. (All day event)
+		fdate, err := time.Parse("2006-01-02", item.Date)
+		if err != nil {
+			Log.Errorf("Unable to parse date: %v", err)
+		}
+		date = fdate.Format("Mon, Jan 02 2006")
+	} else if strings.ContainsAny(d, "T") {
+		// parse and format with timestamp
+		fdate, err := time.Parse(time.RFC3339, d)
+		if err != nil {
+			Log.Errorf("Unable to parse date with time: %v", err)
+		}
+		date = fdate.Format(dateLongFormat)
+	}
+	return date
+}
+
+func parseUpdated(date string) string {
+	// parse and format with timestamp
+	fdate, err := time.Parse(time.RFC3339, date)
+	if err != nil {
+		Log.Errorf("Unable to parse date with time: %v", err)
+	}
+
+	s := time.Since(fdate).Seconds()
+	year := 31207680.00 / s
+	month := 2600640.00 / s
+	week := 604800.00 / s
+	day := 86400.00 / s
+
+	if year < 1 && month >= 1 {
+		return fmt.Sprintf("~%.0f months ago", month)
+	} else if year < 1 && month < 1 {
+		return fmt.Sprintf("~%.0f weeks ago", week)
+	} else if year < 1 && month < 1 && week >= 1 {
+		return fmt.Sprintf("~%.0f days ago", day)
+	} else {
+		return fmt.Sprintf("~%.0f years ago", year)
+	}
+
 }
