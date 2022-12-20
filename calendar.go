@@ -52,6 +52,7 @@ func GetCalendar(client *http.Client) {
 	} else {
 		for _, item := range events.Items {
 			date := parseDate(item.Start)
+			updated := parseUpdated(item.Updated)
 			if item.Description == "" {
 				item.Description = "n/a"
 			}
@@ -62,7 +63,7 @@ func GetCalendar(client *http.Client) {
 				Type:        item.EventType,
 				Attachments: item.Attachments,
 				Status:      item.Status,
-				Updated:     item.Updated,
+				Updated:     updated,
 			})
 		}
 	}
@@ -70,16 +71,4 @@ func GetCalendar(client *http.Client) {
 	spinner.Stop() // Remove spinner
 
 	printEventList(calEvents)
-}
-
-func parseDate(date *calendar.EventDateTime) string {
-	d := date.DateTime
-	if d == "" {
-		fdate, err := time.Parse("2006-01-02", date.Date)
-		if err != nil {
-			Log.Errorf("Unable to parse date: %v", err)
-		}
-		d = fdate.Format("02, Jan 2006")
-	}
-	return d
 }
