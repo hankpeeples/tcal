@@ -4,7 +4,6 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/pterm/pterm"
 )
 
 var baseStyle = lipgloss.NewStyle().
@@ -46,17 +45,14 @@ func (m model) View() string {
 
 func printEventList(list []calEvent) {
 	columns := []table.Column{
-		{Title: "Event Name", Width: pterm.GetTerminalWidth() / 7},
-		{Title: "Date", Width: pterm.GetTerminalWidth() / 7},
-		{Title: "Description", Width: pterm.GetTerminalWidth() / 7},
-		{Title: "Type", Width: 10},
-		{Title: "Status", Width: 12},
-		{Title: "Last Updated", Width: pterm.GetTerminalWidth() / 7},
+		{Title: "Event Name", Width: 25},
+		{Title: "Date", Width: 35},
+		{Title: "Last Updated", Width: 20},
 	}
 
 	var rows []table.Row
 	for _, e := range list {
-		rows = append(rows, table.Row{e.Name, e.Date, e.Description, e.Type, e.Status, e.Updated})
+		rows = append(rows, table.Row{e.Name, e.Date, e.Updated})
 	}
 
 	t := table.New(
