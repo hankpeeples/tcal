@@ -4,17 +4,25 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/pterm/pterm"
 )
 
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.RoundedBorder()).
-	BorderForeground(lipgloss.Color("#c0a46b")).Align(lipgloss.Left)
+var (
+	primaryFg = "#d29965"
+
+	baseStyle = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color(primaryFg)).Align(lipgloss.Left)
+
+	headerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(primaryFg)).Bold(true)
+)
 
 type model struct {
-	table table.Model
+	calTable table.Model
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd {
+	return nil
+}
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
@@ -22,32 +30,51 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
-			if m.table.Focused() {
-				m.table.Blur()
+			if m.calTable.Focused() {
+				m.calTable.Blur()
 			} else {
-				m.table.Focus()
+				m.calTable.Focus()
 			}
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		case "a":
+			return m, tea.Batch(
+				tea.Println("Add new cal item"),
+			)
 		case "enter":
 			return m, tea.Batch(
-				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
+				tea.Printf("Let's go to %s!", m.calTable.SelectedRow()[1]),
 			)
 		}
 	}
-	m.table, cmd = m.table.Update(msg)
+	m.calTable, cmd = m.calTable.Update(msg)
 	return m, cmd
 }
 
 func (m model) View() string {
-	return baseStyle.Render(m.table.View()) + "\n"
+	return baseStyle.Render(m.calTable.View()) + "\n"
+}
+
+func newModel() model {
+	return model{}
 }
 
 func printEventList(list []calEvent) {
-	columns := []table.Column{
-		{Title: "Event Name", Width: 25},
-		{Title: "Date", Width: 35},
-		{Title: "Last Updated", Width: 20},
+	width := pterm.GetTerminalWidth()
+	var columns []table.Column
+
+	if width < 100 {
+		columns = []table.Column{
+			{Title: "Event Name", Width: width / 4},
+			{Title: "Date", Width: width / 3},
+			{Title: "Last Updated", Width: width / 4},
+		}
+	} else {
+		columns = []table.Column{
+			{Title: "Event Name", Width: 25},
+			{Title: "Date", Width: 35},
+			{Title: "Last Updated", Width: 20},
+		}
 	}
 
 	var rows []table.Row
@@ -62,5 +89,15 @@ func printEventList(list []calEvent) {
 		table.WithHeight(len(list)),
 	)
 
-	tea.NewProgram(model{t}).Run()
+	s := table.DefaultStyles()
+	s.Header = s.Header.BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color(primaryFg)).BorderBottom(true).
+		Bold(true)
+
+	t.SetStyles(s)
+
+	if _, err := tea.NewProgram(model{t}).Run(); err != nil {
+		pterm.Error.Println("There was an error displaying the calendar table.")
+		Log.Fatalf("Error running table display: %v", err)
+	}
 }

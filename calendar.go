@@ -48,7 +48,7 @@ func GetCalendar(client *http.Client) {
 	var calEvents []calEvent
 	if len(events.Items) == 0 {
 		Log.Info("No upcoming events found.")
-		pterm.Warning.Println("No upcoming events found.")
+		pterm.Info.Println("No upcoming events found.")
 	} else {
 		for _, item := range events.Items {
 			date := parseDate(item.Start)
