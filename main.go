@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	garg "github.com/alexflint/go-arg"
 	"github.com/gookit/slog"
 	"github.com/gookit/slog/handler"
@@ -22,7 +24,12 @@ var Options struct {
 }
 
 func main() {
-	defer Log.Flush()
+	defer func(Log *slog.Logger) {
+		err := Log.Flush()
+		if err != nil {
+			_ = fmt.Errorf("error flushing Log: %v", err)
+		}
+	}(Log)
 
 	garg.MustParse(&Options)
 
