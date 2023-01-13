@@ -30,7 +30,7 @@ func GetCalendar(client *http.Client) {
 	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
 		spinner.Fail("Unable to retrieve Calendar client...")
-		Log.Fatalf("Unable to retrieve Calendar client: %v", err)
+		Log.Fatalf("unable to retrieve calendar client: %v", err)
 	}
 
 	t := time.Now().Format(time.RFC3339) // Time must be formatted as RFC3339
@@ -39,10 +39,9 @@ func GetCalendar(client *http.Client) {
 
 	events, err := srv.Events.List("primary").ShowDeleted(false).
 		SingleEvents(true).TimeMin(t).MaxResults(Options.NumItems).OrderBy("startTime").Do()
-
 	if err != nil {
 		spinner.Fail("Unable to retrieve calendar events...")
-		Log.Fatalf("Unable to retrieve events: %v", err)
+		Log.Fatalf("unable to retrieve events: %v", err)
 	}
 
 	var calEvents []calEvent
@@ -68,7 +67,11 @@ func GetCalendar(client *http.Client) {
 		}
 	}
 
-	spinner.Stop() // Remove spinner
+	// Remove spinner
+	if err := spinner.Stop(); err != nil {
+		Log.Errorf("unable to kill spinner: %v", err)
+	}
 
-	printEventList(calEvents)
+	tProg := printEventList(calEvents)
+	pterm.Info.Println(tProg)
 }
