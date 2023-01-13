@@ -8,12 +8,10 @@ import (
 )
 
 var (
-	primaryFg = "#d29965"
+	primaryFg = "#555"
 
 	baseStyle = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color(primaryFg)).Align(lipgloss.Left)
-
-	headerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(primaryFg)).Bold(true)
 )
 
 type model struct {
@@ -39,11 +37,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "a":
 			return m, tea.Batch(
-				tea.Println("Add new cal item"),
+				tea.Println(addNewCalendarItem()),
 			)
 		case "enter":
 			return m, tea.Batch(
-				tea.Printf("Let's go to %s!", m.calTable.SelectedRow()[1]),
+				tea.Printf("Let's go to %s!", m.calTable.SelectedRow()[0]),
 			)
 		}
 	}
@@ -59,7 +57,31 @@ func newModel() model {
 	return model{}
 }
 
-func printEventList(list []calEvent) {
+func printEventList(list []calEvent) tea.Model {
+	t := populateTable(list)
+
+	s := table.DefaultStyles()
+	s.Header = s.Header.BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color(primaryFg)).BorderBottom(true).
+		Bold(true)
+
+	t.SetStyles(s)
+
+	tProg, err := tea.NewProgram(model{t}).Run()
+	if err != nil {
+		pterm.Error.Println("There was an error displaying the calendar table.")
+		Log.Fatalf("error running table display: %v", err)
+	}
+
+	return tProg
+}
+
+func addNewCalendarItem() string {
+	// fmt.Println("Add new cal item")
+	return "Test return"
+}
+
+func populateTable(list []calEvent) table.Model {
 	width := pterm.GetTerminalWidth()
 	var columns []table.Column
 
@@ -89,15 +111,5 @@ func printEventList(list []calEvent) {
 		table.WithHeight(len(list)),
 	)
 
-	s := table.DefaultStyles()
-	s.Header = s.Header.BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color(primaryFg)).BorderBottom(true).
-		Bold(true)
-
-	t.SetStyles(s)
-
-	if _, err := tea.NewProgram(model{t}).Run(); err != nil {
-		pterm.Error.Println("There was an error displaying the calendar table.")
-		Log.Fatalf("Error running table display: %v", err)
-	}
+	return t
 }
