@@ -27,7 +27,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/gookit/color v1.5.2 // indirect
-	github.com/gookit/goutil v0.5.15 // indirect
+	github.com/gookit/goutil v0.6.0 // indirect
 	github.com/gookit/gsr v0.0.8 // indirect
 	github.com/lithammer/fuzzysearch v1.1.5 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
